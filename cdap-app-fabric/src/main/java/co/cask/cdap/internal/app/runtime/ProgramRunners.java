@@ -80,13 +80,8 @@ public final class ProgramRunners {
    * @param callable action to perform
    */
   public static <T> T runAsProxyUser(String user, final Callable<T> callable) throws IOException, InterruptedException {
-    return UserGroupInformation.createProxyUser(user, UserGroupInformation.getLoginUser())
-      .doAs(new PrivilegedExceptionAction<T>() {
-        @Override
-        public T run() throws Exception {
-          return callable.call();
-        }
-      });
+    return runAsUGI(UserGroupInformation.createProxyUser(user, UserGroupInformation.getLoginUser()),
+                    callable);
   }
 
 
@@ -109,7 +104,7 @@ public final class ProgramRunners {
   public static long updateLogicalStartTime(Map<String, String> arguments) {
     String value = arguments.get(ProgramOptionConstants.LOGICAL_START_TIME);
     try {
-      // value is only empty/null in in some unit tests
+      // value is only empty/null in some unit tests
       long logicalStartTime = Strings.isNullOrEmpty(value) ? System.currentTimeMillis() : Long.parseLong(value);
       arguments.put(ProgramOptionConstants.LOGICAL_START_TIME, Long.toString(logicalStartTime));
       return logicalStartTime;

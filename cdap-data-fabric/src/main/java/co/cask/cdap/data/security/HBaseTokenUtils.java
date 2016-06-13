@@ -19,7 +19,9 @@ package co.cask.cdap.data.security;
 import com.google.common.base.Throwables;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.security.User;
+import org.apache.hadoop.hbase.security.UserProvider;
 import org.apache.hadoop.security.Credentials;
+import org.apache.hadoop.security.UserGroupInformation;
 import org.apache.hadoop.security.token.Token;
 import org.apache.hadoop.security.token.TokenIdentifier;
 import org.slf4j.Logger;
@@ -45,6 +47,17 @@ public final class HBaseTokenUtils {
     }
 
     try {
+
+
+// Removed on HBase 2.0:
+/*
+      commit 48be35cb7effffa0af9e9f0115e643047c4f242a
+      Author: Jonathan M Hsieh <jmhsieh@apache.org>
+      Date:   Wed Nov 4 15:28:06 2015 -0800
+
+      HBASE-14713 Remove simple deprecated-since-1.0 code in hbase-server from hbase 2.0
+*/
+
       Class c = Class.forName("org.apache.hadoop.hbase.security.token.TokenUtil");
       Method method = c.getMethod("obtainToken", Configuration.class);
 

@@ -54,6 +54,7 @@ import org.apache.hadoop.mapreduce.JobContext;
 import org.apache.hadoop.security.UserGroupInformation;
 import org.apache.hadoop.yarn.conf.YarnConfiguration;
 import org.apache.twill.api.EventHandler;
+import org.apache.twill.api.SecureStore;
 import org.apache.twill.api.TwillApplication;
 import org.apache.twill.api.TwillController;
 import org.apache.twill.api.TwillPreparer;
@@ -200,15 +201,19 @@ public abstract class AbstractDistributedProgramRunner implements ProgramRunner 
       // The HDFS token should already obtained by Twill.
 
 
-      LOG.info("Version 000201");
+      LOG.info("Version 000202");
       LOG.info("Options#CFG_HDFS_USER: {}", options.getArguments().getOption(Constants.CFG_HDFS_USER));
 
 //      String keytabPath = cConf.get(Constants.Security.CFG_CDAP_MASTER_KRB_KEYTAB_PATH);
-      String keytabPath = "/tmp/new.keytab";
-      String user = "ali/secure-autobuild-v29908-1000.dev.continuuity.net@CONTINUUITY.NET";
-      UserGroupInformation aliUGI = UserGroupInformation.loginUserFromKeytabAndReturnUGI(user, keytabPath);
+//      String keytabPath = "/tmp/new.keytab";
+//      String user = "ali/secure-autobuild-v29908-1000.dev.continuuity.net@CONTINUUITY.NET";
+//      UserGroupInformation aliUGI = UserGroupInformation.loginUserFromKeytabAndReturnUGI(user, keytabPath);
 
-      return ProgramRunners.runAsUGI(aliUGI, new Callable<ProgramController>() {
+      UserGroupInformation proxyAli = UserGroupInformation.createProxyUser("ali", UserGroupInformation.getLoginUser());
+
+      final SecureStore secureStore = secureStoreUpdater.update(null, null);
+
+      return ProgramRunners.runAsUGI(proxyAli, new Callable<ProgramController>() {
         @Override
         public ProgramController call() throws Exception {
 
@@ -261,7 +266,7 @@ public abstract class AbstractDistributedProgramRunner implements ProgramRunner 
           // Add secure tokens
           if (User.isHBaseSecurityEnabled(hConf) || UserGroupInformation.isSecurityEnabled()) {
             // TokenSecureStoreUpdater.update() ignores parameters
-            twillPreparer.addSecureStore(secureStoreUpdater.update(null, null));
+            twillPreparer.addSecureStore(secureStore);
           }
 
           Iterable<Class<?>> dependencies = Iterables.concat(
