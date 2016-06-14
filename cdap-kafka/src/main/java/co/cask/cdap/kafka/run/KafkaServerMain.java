@@ -81,6 +81,27 @@ public class KafkaServerMain extends DaemonMain {
                                          KafkaConstants.DEFAULT_REPLICATION_FACTOR);
     LOG.info("Using replication factor {}", replicationFactor);
 
+    int retentionHours = cConf.getInt(KafkaConstants.ConfigKeys.RETENTION_HOURS_CONFIG,
+                                      KafkaConstants.DEFAULT_RETENTION_HOURS);
+
+    int bufferSendBytes = cConf.getInt(KafkaConstants.ConfigKeys.BUFFER_BYTES_SEND_CONFIG,
+                                       KafkaConstants.DEFAULT_BUFFER_BYTES);
+    int bufferReceiveBytes = cConf.getInt(KafkaConstants.ConfigKeys.BUFFER_BYTES_RECEIVE_CONFIG,
+                                          KafkaConstants.DEFAULT_BUFFER_BYTES);
+
+    int socketRequestMaxBytes = cConf.getInt(KafkaConstants.ConfigKeys.MAX_BYTES_CONFIG,
+                                             KafkaConstants.DEFAULT_SOCKET_MAX_BYTES);
+
+    long intervalMessageSize = cConf.getLong(KafkaConstants.ConfigKeys.INTERVAL_MESSAGES_CONFIG,
+                                             KafkaConstants.DEFAULT_INTERVAL_MESSAGE_SIZE);
+
+    long messagePersistTime = cConf.getLong(KafkaConstants.ConfigKeys.INTERVAL_MS_CONFIG);
+
+    int logFileSize = cConf.getInt(KafkaConstants.ConfigKeys.SEGEMENT_BYTES_CONFIG,
+                                   KafkaConstants.DEFAULT_LOG_FILE_SIZE);
+
+    int zookeeperTimeout = cConf.getInt(KafkaConstants.ConfigKeys.ZOOKEEPER_CONNECTION_TIMEOUT_CONFIG);
+
     if (zkNamespace != null) {
       ZKClientService client = ZKClientService.Builder.of(zkConnectStr).build();
       try {
@@ -106,7 +127,9 @@ public class KafkaServerMain extends DaemonMain {
     LOG.info(String.format("Initializing server with broker id %d", brokerId));
 
     kafkaProperties = generateKafkaConfig(brokerId, zkConnectStr, hostname, port, numPartitions,
-                                          replicationFactor, logDir);
+                                          replicationFactor, logDir, retentionHours, bufferSendBytes,
+                                          bufferReceiveBytes, socketRequestMaxBytes, intervalMessageSize,
+                                          messagePersistTime, logFileSize, zookeeperTimeout);
   }
 
   @Override
@@ -137,7 +160,10 @@ public class KafkaServerMain extends DaemonMain {
   }
 
   private Properties generateKafkaConfig(int brokerId, String zkConnectStr, String hostname, int port,
-                                         int numPartitions, int replicationFactor, String logDir) {
+                                         int numPartitions, int replicationFactor, String logDir, int retentionHours,
+                                         int bufferSendBytes, int bufferReceiveBytes, int socketRequestMaxBytes,
+                                         long intervalMessageSize, long messagePersistTime, int logFileSize,
+                                         int zookeeperTimeout) {
     Preconditions.checkState(port > 0, "Port number is invalid.");
     Preconditions.checkState(numPartitions > 0, "Num partitions should be greater than zero.");
 
@@ -147,17 +173,17 @@ public class KafkaServerMain extends DaemonMain {
       prop.setProperty("host.name", hostname);
     }
     prop.setProperty("port", Integer.toString(port));
-    prop.setProperty("socket.send.buffer.bytes", "1048576");
-    prop.setProperty("socket.receive.buffer.bytes", "1048576");
-    prop.setProperty("socket.request.max.bytes", "104857600");
+    prop.setProperty("socket.send.buffer.bytes", Integer.toString(bufferSendBytes));
+    prop.setProperty("socket.receive.buffer.bytes", Integer.toString(bufferReceiveBytes));
+    prop.setProperty("socket.request.max.bytes", Integer.toString(socketRequestMaxBytes));
     prop.setProperty("log.dir", logDir);
     prop.setProperty("num.partitions", Integer.toString(numPartitions));
-    prop.setProperty("log.retention.hours", "24");
-    prop.setProperty("log.flush.interval.messages", "10000");
-    prop.setProperty("log.flush.interval.ms", "1000");
-    prop.setProperty("log.segment.bytes", "536870912");
+    prop.setProperty("log.retention.hours", Integer.toString(retentionHours));
+    prop.setProperty("log.flush.interval.messages", Long.toString(intervalMessageSize));
+    prop.setProperty("log.flush.interval.ms", Long.toString(messagePersistTime));
+    prop.setProperty("log.segment.bytes", Integer.toString(logFileSize));
     prop.setProperty("zookeeper.connect", zkConnectStr);
-    prop.setProperty("zookeeper.connection.timeout.ms", "1000000");
+    prop.setProperty("zookeeper.connection.timeout.ms", Integer.toString(zookeeperTimeout));
     prop.setProperty("default.replication.factor", Integer.toString(replicationFactor));
     return prop;
   }

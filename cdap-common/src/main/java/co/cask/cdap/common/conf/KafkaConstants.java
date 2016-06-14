@@ -32,8 +32,22 @@ public final class KafkaConstants {
     public static final String HOSTNAME_CONFIG = "kafka.bind.address";
     public static final String ZOOKEEPER_NAMESPACE_CONFIG = "kafka.zookeeper.namespace";
     public static final String REPLICATION_FACTOR = "kafka.default.replication.factor";
+    public static final String RETENTION_HOURS_CONFIG = "kafka.log.retention.hours";
+    public static final String BUFFER_BYTES_SEND_CONFIG = "kafka.socket.send.buffer.bytes";
+    public static final String BUFFER_BYTES_RECEIVE_CONFIG = "kafka.socket.receive.buffer.bytes";
+    public static final String MAX_BYTES_CONFIG = "kafka.socket.request.max.bytes";
+    public static final String INTERVAL_MESSAGES_CONFIG = "kafka.log.flush.interval.messages";
+    public static final String INTERVAL_MS_CONFIG = "kafka.log.flush.interval.ms";
+    public static final String SEGEMENT_BYTES_CONFIG = "kafka.log.segment.bytes";
+    public static final String ZOOKEEPER_CONNECTION_TIMEOUT_CONFIG = "kafka.zookeeper.connection.timeout.ms";
   }
 
   public static final int DEFAULT_NUM_PARTITIONS = 10;
   public static final int DEFAULT_REPLICATION_FACTOR = 1;
+  public static final int DEFAULT_RETENTION_HOURS = 168;
+  public static final int DEFAULT_BUFFER_BYTES = 102400;
+  public static final int DEFAULT_SOCKET_MAX_BYTES = 104857600;
+  public static final long DEFAULT_INTERVAL_MESSAGE_SIZE = 9223372036854775807L;
+  public static final int DEFAULT_LOG_FILE_SIZE = 1073741824;
+
 }
